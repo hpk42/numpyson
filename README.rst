@@ -1,8 +1,12 @@
 numpyson
 ========
 
-py2/py3 compatible serializer, currently using and extending jsonpickle 
+cross py2/py3 python object serializer, currently using and extending jsonpickle 
 to dump/load python objects with a primary focus on numpy/pandas types.
+
+The main purpose of ``numpyson`` is to allow dumping under a python3 interpreter
+and loading under python2 and vice versa.  This is a use case that is not covered
+by current serializers ASFAIK.
 
 quick simple API example::
 
