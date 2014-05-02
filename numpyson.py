@@ -117,8 +117,8 @@ def register_handlers():
 
 def dumps(obj):
     register_handlers()
-    return jsonpickle.encode(obj)
+    return jsonpickle.encode(obj).encode("utf-8")
 
 def loads(obj):
     register_handlers()
-    return jsonpickle.decode(obj)
+    return jsonpickle.decode(obj.decode("utf-8"))
