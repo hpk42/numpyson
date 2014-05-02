@@ -1,8 +1,8 @@
 numpyson
 ========
 
-py2/py3 compatible serializer extending jsonpickle to deal 
-with numpy/pandas types.
+py2/py3 compatible serializer, currently using and extending jsonpickle 
+to dump/load python objects with a primary focus on numpy/pandas types.
 
 quick simple API example::
 
