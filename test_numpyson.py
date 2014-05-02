@@ -1,15 +1,10 @@
 import datetime as dt
 
 import pytest
-import jsonpickle
 import numpy as np
 import pandas as pd
 
-from numpyson import register_handlers
-
-@pytest.fixture(scope="session", autouse=True)
-def reg():
-    register_handlers()
+from numpyson import dumps, loads
 
 @pytest.mark.parametrize('arr', [
     np.array([1, 2, 3]),
@@ -19,14 +14,14 @@ def reg():
     np.array([dt.date(1970, 1, 1), dt.date(1970, 1, 2), dt.date(1970, 1, 3)]),
 ])
 def test_numpy_array_handler(arr):
-    buf = jsonpickle.encode(arr)
-    arr_after = jsonpickle.decode(buf)
+    buf = dumps(arr)
+    arr_after = loads(buf)
     assert (arr == arr_after).all()
 
 def test_nested_array():
     d = {"1": np.array([1,2])}
-    buf = jsonpickle.encode(d)
-    d_after = jsonpickle.decode(buf)
+    buf = dumps(d)
+    d_after = loads(buf)
     assert (d["1"] == d_after["1"]).all()
     
 
@@ -36,14 +31,14 @@ def test_nested_array():
     pd.date_range('1970-01-01', periods=3, freq='S'),
 ])
 def test_pandas_timeseries_handler(ts):
-    buf = jsonpickle.encode(ts)
-    ts_after = jsonpickle.decode(buf)
+    buf = dumps(ts)
+    ts_after = loads(buf)
     assert (ts == ts_after).all()
 
 def test_timeseries_nested():
     d = {"1": pd.date_range('1970-01-01', periods=3, freq='S')}
-    buf = jsonpickle.encode(d)
-    d_after = jsonpickle.decode(buf)
+    buf = dumps(d)
+    d_after = loads(buf)
     assert (d["1"] == d_after["1"]).all()
 
 @pytest.mark.parametrize('df', [
@@ -52,8 +47,8 @@ def test_timeseries_nested():
     pd.DataFrame({0: [1, 2, 3], 1: [1.1, 2.2, 3.3]}, index=pd.date_range('1970-01-01', periods=3, freq='S')),
 ])
 def test_pandas_dataframe_handler(df):
-    buf = jsonpickle.encode(df)
-    ts_after = jsonpickle.decode(buf)
+    buf = dumps(df)
+    ts_after = loads(buf)
     assert (df == ts_after).all().all()
 
 
@@ -63,8 +58,8 @@ def test_mixed_python_and_pandas_types():
         pd.TimeSeries([1, 2, 3], index=[0, 1, 2]),
         pd.DataFrame({0: [1, 2, 3], 1: [1.1, 2.2, 3.3]}, index=pd.date_range('1970-01-01', periods=3, freq='S'))
     )
-    buf = jsonpickle.encode(data)
-    data_after = jsonpickle.decode(buf)
+    buf = dumps(data)
+    data_after = loads(buf)
 
     assert isinstance(data, tuple)
     assert len(data) == 3

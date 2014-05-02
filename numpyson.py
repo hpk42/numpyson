@@ -114,3 +114,11 @@ def register_handlers():
     NumpyArrayHandler.handles(np.ndarray)
     PandasTimeSeriesHandler.handles(pd.TimeSeries)
     PandasDataFrameHandler.handles(pd.DataFrame)
+
+def dumps(obj):
+    register_handlers()
+    return jsonpickle.encode(obj)
+
+def loads(obj):
+    register_handlers()
+    return jsonpickle.decode(obj)
