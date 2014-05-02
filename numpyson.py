@@ -16,17 +16,17 @@ by compressing/decompressing the resulting json output if you need to.
 import numpy as np
 import pandas as pd
 
-from jsonpickle import util
-from jsonpickle.handlers import BaseHandler
+import jsonpickle.handlers
+import jsonpickle.util
 
 
-class NumpyArrayHandler(BaseHandler):
+class NumpyArrayHandler(jsonpickle.handlers.BaseHandler):
     """A jsonpickle handler for numpy (de)serialising arrays."""
 
     def flatten(self, obj, data):
         pickler = self.context
         flatten = pickler.flatten
-        buffer = util.b64encode(obj.tostring())
+        buffer = jsonpickle.util.b64encode(obj.tostring())
         #TODO: should probably also consider including other parameters in future such as byteorder, etc.
         #TODO: see numpy.info(obj) and obj.__reduce__() for details.
         shape = flatten(obj.shape)
@@ -44,11 +44,11 @@ class NumpyArrayHandler(BaseHandler):
         shape = restore(args[0])
         dtype = np.dtype(restore(args[1]))
         strides = restore(args[2])
-        buffer = util.b64decode(args[3])
+        buffer = jsonpickle.util.b64decode(args[3])
         return cls(shape=shape, dtype=dtype, buffer=buffer, strides=strides)
 
 
-class PandasTimeSeriesHandler(BaseHandler):
+class PandasTimeSeriesHandler(jsonpickle.handlers.BaseHandler):
     """A jsonpickle handler for numpy (de)serialising pandas TimeSeries objects."""
 
     def flatten(self, obj, data):
@@ -70,7 +70,7 @@ class PandasTimeSeriesHandler(BaseHandler):
         return cls(data=values, index=index)
 
 
-class PandasDataFrameHandler(BaseHandler):
+class PandasDataFrameHandler(jsonpickle.handlers.BaseHandler):
     """A jsonpickle handler for numpy (de)serialising pandas DataFrame objects."""
 
     def flatten(self, obj, data):

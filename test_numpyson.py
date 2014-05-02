@@ -25,7 +25,10 @@ def test_numpy_array_handler(arr):
 
 @pytest.mark.parametrize('ts', [
     pd.TimeSeries([1, 2, 3], index=[0, 1, 2]),
-    pd.TimeSeries([1., 2., 3.], pd.date_range('1970-01-01', periods=3, freq='S'))
+    pd.TimeSeries([1., 2., 3.], pd.date_range('1970-01-01', periods=3, freq='S')),
+    pytest.mark.xfail(reason="does not serialize/unserialize")(
+       {"1": pd.date_range('1970-01-01', periods=3, freq='S')}
+    ),
 ])
 def test_pandas_timeseries_handler(ts):
     buf = jsonpickle.encode(ts)
