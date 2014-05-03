@@ -13,6 +13,7 @@ by compressing/decompressing the resulting json output if you need to.
 (C) David Moss, Holger Krekel 2014
 """
 
+__version__ = '0.2.dev2'
 import numpy as np
 import pandas as pd
 

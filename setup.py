@@ -3,7 +3,7 @@ from setuptools import setup
 
 if __name__ == "__main__":
     setup(name="numpyson",
-          version="0.1",
+          version='0.2.dev2',
           long_description=open("README.rst").read(),
           py_modules=['numpyson', 'test_numpyson'],
           author="holger krekel, David Moss",

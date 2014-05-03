@@ -16,6 +16,9 @@ assert_frame_equal_strict = partial(assert_frame_equal, check_dtype=True, check_
 
 from numpyson import dumps, loads
 
+def test_version():
+    import numpyson
+    assert numpyson.__version__
 
 @pytest.mark.parametrize('arr_before', [
     np.array([1, 2, 3]),
