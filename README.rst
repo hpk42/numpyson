@@ -6,7 +6,7 @@ to dump/load python objects with a primary focus on numpy/pandas types.
 
 The main purpose of ``numpyson`` is to allow dumping under a python3 interpreter
 and loading under python2 and vice versa.  This is a use case that is not covered
-by current serializers ASFAIK.
+by current serializers AFAIK.
 
 quick simple API example::
 
@@ -19,7 +19,10 @@ quick simple API example::
 Currently supported:
 
 - ``numpy arrays`` and some other numpy types
-- ``pandas.DataFrame``
-- ``pandas.date_range``
 - ``pandas.TimeSeries``
+- ``pandas.DataFrame``
+- ``pandas.DateTimeIndex``
+- ``pandas.Int64Index``
+- ``pandas.Float64Index``
+- ``pandas.Index``
 - nested python data structures with the above types
