@@ -106,6 +106,23 @@ class PandasInt64IndexHandler(BaseHandler):
         return cls(data=values)
 
 
+class PandasFloat64IndexHandler(BaseHandler):
+    """A jsonpickle handler for numpy (de)serialising pandas Float64Index objects."""
+
+    def flatten(self, obj, data):
+        flatten = self.context.flatten
+        values = flatten(obj.values)
+        args = [values]
+        data['__reduce__'] = (flatten(pd.Float64Index), args)
+        return data
+
+    def restore(self, obj):
+        cls, args = obj['__reduce__']
+        cls = self.nrestore(cls, reset=False)
+        values = self.nrestore(args[0])
+        return cls(data=values)
+
+
 class PandasIndexHandler(BaseHandler):
     """A jsonpickle handler for numpy (de)serialising pandas Index objects."""
 
@@ -149,6 +166,7 @@ def register_handlers():
     """Call this function to register handlers with jsonpickle module."""
     PandasDateTimeIndexHandler.handles(pd.DatetimeIndex)
     PandasInt64IndexHandler.handles(pd.Int64Index)
+    PandasFloat64IndexHandler.handles(pd.Float64Index)
     PandasIndexHandler.handles(pd.Index)
     NumpyArrayHandler.handles(np.ndarray)
     PandasTimeSeriesHandler.handles(pd.TimeSeries)

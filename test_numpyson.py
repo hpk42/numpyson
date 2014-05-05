@@ -57,6 +57,7 @@ def test_pandas_timeseries_handler(ts_before):
 
 @pytest.mark.parametrize('index_before', [
     pd.Index([0, 1, 2]),
+    pd.Index([0., 1., 2.]), # not sure why you would want to index by floating point numbers; here for completeness
     pd.Index(['a', 'b', 'c']),
 ])
 def test_pandas_index_handler(index_before):
