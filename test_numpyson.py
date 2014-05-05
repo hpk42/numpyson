@@ -26,6 +26,10 @@ def test_version():
     np.array(['foo', 'bar', 'baz']),
     np.array([dt.datetime(1970, 1, 1, 12, 57), dt.datetime(1970, 1, 1, 12, 58), dt.datetime(1970, 1, 1, 12, 59)]),
     np.array([dt.date(1970, 1, 1), dt.date(1970, 1, 2), dt.date(1970, 1, 3)]),
+    np.array([True, False, True]),
+    np.arange(10).T,
+    np.array([[1, 4, 7], [2, 5, 8], [3, 6, 9]]),
+    np.array([[[1., 10.], [4., 40.], [7., 70.]], [[2., 20.], [5., 50.], [8., 80.]], [[3., 30.], [6., 60.], [9., 90.]]]),
 ])
 def test_numpy_array_handler(arr_before):
     buf = dumps(arr_before)
@@ -87,6 +91,14 @@ TEST_DATA_FRAMES = (
     pd.DataFrame({0: [1, 2, 3], 1: [1.1, 2.2, 3.3]}, index=pd.date_range('1970-01-01', periods=3, freq='S')),
     pd.DataFrame({0: [1, 2, 3], 1: [1.1, 2.2, 3.3]}, index=pd.date_range('1970-01-01', periods=3, freq='D')),
     pd.DataFrame({'a': [1, 2, 3], 'b': [1.1, 2.2, 3.3]}, index=pd.date_range('1970-01-01', periods=3, freq='D')),
+    pd.DataFrame({
+            'i': [1, 2, 3],
+            'f': [1.1, 2.2, 3.3],
+            's': ['ham', 'spam', 'eggs'],
+            'b': [True, False, True],
+            'o': [{'a': 1}, {'b': 2}, {'c': 3}],
+        },
+        index=pd.date_range('1970-01-01', periods=3, freq='S')),
 )
 
 
@@ -103,7 +115,7 @@ def test_mixed_python_and_pandas_types():
     data_after = loads(buf)
 
     assert isinstance(data_after, tuple)
-    assert len(data_after) == 5
+    assert len(data_after) == len(TEST_DATA_FRAMES)
     assert len(data_before) == len(data_after)
     for df_before, df_after in zip(data_before, data_after):
         assert_frame_equal_strict(df_before, df_after)
