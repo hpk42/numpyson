@@ -106,7 +106,11 @@ TEST_DATA_FRAMES = (
 )
 
 
-@pytest.mark.parametrize('df_before', TEST_DATA_FRAMES)
+@pytest.mark.parametrize('df_before', TEST_DATA_FRAMES + (
+    pytest.mark.xfail(
+        pd.DataFrame(np.ones(shape=(10,15)), index=pd.date_range('1970-01-01', periods=10))
+    ),
+))
 def test_pandas_dataframe_handler(df_before):
     buf = dumps(df_before)
     df_after = loads(buf)
