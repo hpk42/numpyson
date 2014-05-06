@@ -90,13 +90,13 @@ class PandasDateTimeIndexHandler(BaseHandler):
         return cls(data=values, freq=freq)
 
 
-def _build_index_handler_for_type(index_class):
-    if not issubclass(index_class, pd.Index) and type(index_class) != pd.DatetimeIndex:
+def build_index_handler_for_type(index_class):
+    """A class factor that builds jsonpickle handlers for various index types."""
+    if not issubclass(index_class, pd.Index) or index_class == pd.DatetimeIndex:
         raise TypeError('expected a subclass of pandas.Index, got %s' % type(index_class))
 
     class _IndexHandler(BaseHandler):
         """A jsonpickle handler for numpy (de)serialising pandas Index objects."""
-
         def flatten(self, obj, data):
             flatten = self.context.flatten
             values = flatten(obj.values)
@@ -112,9 +112,9 @@ def _build_index_handler_for_type(index_class):
 
     return _IndexHandler
 
-PandasInt64IndexHandler = _build_index_handler_for_type(pd.Int64Index)
-PandasFloat64IndexHandler = _build_index_handler_for_type(pd.Float64Index)
-PandasIndexHandler = _build_index_handler_for_type(pd.Index)
+PandasInt64IndexHandler = build_index_handler_for_type(pd.Int64Index)
+PandasFloat64IndexHandler = build_index_handler_for_type(pd.Float64Index)
+PandasIndexHandler = build_index_handler_for_type(pd.Index)
 
 
 class PandasDataFrameHandler(BaseHandler):

@@ -1,5 +1,6 @@
 import datetime as dt
 from functools import partial
+import inspect
 
 import pytest
 import numpy as np
@@ -14,11 +15,13 @@ assert_frame_equal_strict = partial(assert_frame_equal, check_dtype=True, check_
                                     check_column_type=True, check_frame_type=True, check_less_precise=False,
                                     check_names=True)
 
-from numpyson import dumps, loads
+from numpyson import dumps, loads, build_index_handler_for_type
+
 
 def test_version():
     import numpyson
     assert numpyson.__version__
+
 
 @pytest.mark.parametrize('arr_before', [
     np.array([1, 2, 3]),
@@ -57,7 +60,7 @@ def test_pandas_timeseries_handler(ts_before):
 
 @pytest.mark.parametrize('index_before', [
     pd.Index([0, 1, 2]),
-    pd.Index([0., 1., 2.]), # not sure why you would want to index by floating point numbers; here for completeness
+    pd.Index([0., 1., 2.]),  # not sure why you would want to index by floating point numbers; here for completeness
     pd.Index(['a', 'b', 'c']),
 ])
 def test_pandas_index_handler(index_before):
@@ -120,3 +123,17 @@ def test_mixed_python_and_pandas_types():
     assert len(data_before) == len(data_after)
     for df_before, df_after in zip(data_before, data_after):
         assert_frame_equal_strict(df_before, df_after)
+
+
+def test_build_index_handler_for_type():
+    for index_class in ():
+        handler_cls = build_index_handler_for_type(index_class)
+        assert inspect.isclass(handler_cls)
+        assert hasattr(handler_cls, 'flatten')
+        assert hasattr(handler_cls, 'restore')
+
+    with pytest.raises(TypeError):
+        build_index_handler_for_type(pd.DatetimeIndex)
+
+    with pytest.raises(TypeError):
+        build_index_handler_for_type(pd.TimeSeries)
