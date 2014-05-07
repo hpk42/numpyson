@@ -33,6 +33,8 @@ def test_version():
     np.arange(10).T,
     np.array([[1, 4, 7], [2, 5, 8], [3, 6, 9]]),
     np.array([[[1., 10.], [4., 40.], [7., 70.]], [[2., 20.], [5., 50.], [8., 80.]], [[3., 30.], [6., 60.], [9., 90.]]]),
+    np.reshape(np.arange(100), (10, 10)),
+    np.reshape(np.arange(100).T, (10, 10)),
 ])
 def test_numpy_array_handler(arr_before):
     buf = dumps(arr_before)
@@ -103,14 +105,11 @@ TEST_DATA_FRAMES = (
             'o': [{'a': 1}, {'b': 2}, {'c': 3}],
         },
         index=pd.date_range('1970-01-01', periods=3, freq='S')),
+    pd.DataFrame(np.ones(shape=(10,15)), index=pd.date_range('1970-01-01', periods=10))
 )
 
 
-@pytest.mark.parametrize('df_before', TEST_DATA_FRAMES + (
-    pytest.mark.xfail(
-        pd.DataFrame(np.ones(shape=(10,15)), index=pd.date_range('1970-01-01', periods=10))
-    ),
-))
+@pytest.mark.parametrize('df_before', TEST_DATA_FRAMES)
 def test_pandas_dataframe_handler(df_before):
     buf = dumps(df_before)
     df_after = loads(buf)

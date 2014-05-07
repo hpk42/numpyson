@@ -36,8 +36,7 @@ class NumpyArrayHandler(BaseHandler):
         flatten = self.context.flatten
         shape = flatten(obj.shape)
         dtype = str(obj.dtype)
-        strides = flatten(obj.strides)
-        args = [shape, dtype, strides, buf]
+        args = [shape, dtype, buf]
         data['__reduce__'] = (flatten(np.ndarray, reset=False), args)
         return data
 
@@ -46,9 +45,8 @@ class NumpyArrayHandler(BaseHandler):
         cls = self.nrestore(cls)
         shape = self.nrestore(args[0])
         dtype = np.dtype(self.nrestore(args[1]))
-        strides = self.nrestore(args[2])
-        buf = jsonpickle.util.b64decode(args[3])
-        return cls(shape=shape, dtype=dtype, buffer=buf, strides=strides)
+        buf = jsonpickle.util.b64decode(args[2])
+        return cls(shape=shape, dtype=dtype, buffer=buf)
 
 
 class PandasTimeSeriesHandler(BaseHandler):
