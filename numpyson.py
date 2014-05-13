@@ -28,7 +28,6 @@ class BaseHandler(jsonpickle.handlers.BaseHandler):
 
 class NumpyArrayHandler(BaseHandler):
     """A jsonpickle handler for numpy (de)serialising arrays."""
-
     def flatten(self, obj, data):
         buf = jsonpickle.util.b64encode(obj.tostring())
         #TODO: should probably also consider including other parameters in future such as byteorder, etc.
@@ -36,7 +35,9 @@ class NumpyArrayHandler(BaseHandler):
         flatten = self.context.flatten
         shape = flatten(obj.shape)
         dtype = str(obj.dtype)
-        args = [shape, dtype, buf]
+        np.info(obj)
+        order = 'F' if obj.flags.fortran else 'C'
+        args = [shape, dtype, buf, order]
         data['__reduce__'] = (flatten(np.ndarray, reset=False), args)
         return data
 
@@ -46,7 +47,8 @@ class NumpyArrayHandler(BaseHandler):
         shape = self.nrestore(args[0])
         dtype = np.dtype(self.nrestore(args[1]))
         buf = jsonpickle.util.b64decode(args[2])
-        return cls(shape=shape, dtype=dtype, buffer=buf)
+        order = args[3]
+        return cls(shape=shape, dtype=dtype, buffer=buf, order=order)
 
 
 class PandasTimeSeriesHandler(BaseHandler):

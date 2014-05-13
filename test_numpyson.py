@@ -49,6 +49,27 @@ def test_nested_array():
     assert_equal(data_before["1"], data_after["1"])
 
 
+def test_preservation_of_specific_array_ordering():
+    arr_c = np.array([[1,2],[3,4]], order='C')
+    arr_f = np.array([[1,2],[3,4]], order='F')
+
+    assert_equal(arr_c, arr_f)
+
+    assert arr_c.strides != arr_f.strides
+
+    #   C array ordering
+    arr_c_after = loads(dumps(arr_c))
+    assert arr_c.strides == arr_c_after.strides
+    assert not arr_c.flags.fortran
+    assert not arr_c_after.flags.fortran
+
+    #   Fortran array order
+    arr_f_after = loads(dumps(arr_f))
+    assert arr_f.strides == arr_f_after.strides
+    assert arr_f.flags.fortran
+    assert arr_f_after.flags.fortran
+
+
 @pytest.mark.parametrize('ts_before', [
     pd.TimeSeries([1, 2, 3], index=[0, 1, 2]),
     pd.TimeSeries([1., 2., 3.], pd.date_range('1970-01-01', periods=3, freq='S')),
@@ -140,3 +161,19 @@ def test_build_index_handler_for_type():
 
     with pytest.raises(TypeError):
         build_index_handler_for_type(pd.TimeSeries)
+
+@pytest.mark.xfail(reason='failing preserve underlying array state when it is wrapped inside a Pandas object')
+def test_preservation_of_specific_array_ordering():
+    df_c = pd.DataFrame(np.array([[1,2],[3,4]], order='C'))
+    df_c_after = loads(dumps(df_c))
+    assert_frame_equal_strict(df_c, df_c_after)
+    assert_equal(df_c.values, df_c_after.values)
+    assert not df_c.values.flags.fortran
+    assert not df_c_after.values.flags.fortran
+
+    df_f = pd.DataFrame(np.array([[1,2],[3,4]], order='F'))
+    df_f_after = loads(dumps(df_f))
+    assert_frame_equal_strict(df_f, df_f_after)
+    assert_equal(df_f.values, df_f_after.values)
+    assert df_f.values.flags.fortran
+    assert df_f_after.values.flags.fortran
