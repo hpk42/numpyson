@@ -25,11 +25,13 @@ class BaseHandler(jsonpickle.handlers.BaseHandler):
     def nrestore(self, arg, reset=False):
         return self.context.restore(arg, reset=reset)
 
+    def nflatten(self, arg, reset=False):
+        return self.context.flatten(arg, reset=reset)
+
 
 class NumpyNumber(BaseHandler):
     def flatten(self, obj, data):
-        flatten = self.context.flatten
-        data["__reduce__"] = (flatten(type(obj)), [float(obj)])
+        data["__reduce__"] = (self.nflatten(type(obj)), [float(obj)])
         return data
 
     def restore(self, obj):
@@ -44,12 +46,11 @@ class NumpyArrayHandler(BaseHandler):
         buf = jsonpickle.util.b64encode(obj.tostring())
         #TODO: should probably also consider including other parameters in future such as byteorder, etc.
         #TODO: see numpy.info(obj) and obj.__reduce__() for details.
-        flatten = self.context.flatten
-        shape = flatten(obj.shape)
+        shape = self.nflatten(obj.shape)
         dtype = str(obj.dtype)
         order = 'F' if obj.flags.fortran else 'C'
         args = [shape, dtype, buf, order]
-        data['__reduce__'] = (flatten(np.ndarray, reset=False), args)
+        data['__reduce__'] = (self.nflatten(np.ndarray), args)
         return data
 
     def restore(self, obj):
@@ -66,11 +67,10 @@ class PandasTimeSeriesHandler(BaseHandler):
     """A jsonpickle handler for numpy (de)serialising pandas TimeSeries objects."""
 
     def flatten(self, obj, data):
-        flatten = self.context.flatten
-        values = flatten(obj.values)
-        index = flatten(obj.index.values)
+        values = self.nflatten(obj.values)
+        index = self.nflatten(obj.index.values)
         args = [values, index]
-        data['__reduce__'] = (flatten(pd.TimeSeries), args)
+        data['__reduce__'] = (self.nflatten(pd.TimeSeries), args)
         return data
 
     def restore(self, obj):
@@ -86,11 +86,10 @@ class PandasDateTimeIndexHandler(BaseHandler):
     """A jsonpickle handler for numpy (de)serialising pandas DateTimeIndex objects."""
 
     def flatten(self, obj, data):
-        flatten = self.context.flatten
-        values = flatten(obj.values)
-        freq = flatten(obj.freq)
+        values = self.nflatten(obj.values)
+        freq = self.nflatten(obj.freq)
         args = [values, freq]
-        data['__reduce__'] = (flatten(pd.DatetimeIndex), args)
+        data['__reduce__'] = (self.nflatten(pd.DatetimeIndex), args)
         return data
 
     def restore(self, obj):
@@ -109,15 +108,14 @@ def build_index_handler_for_type(index_class):
     class _IndexHandler(BaseHandler):
         """A jsonpickle handler for numpy (de)serialising pandas Index objects."""
         def flatten(self, obj, data):
-            flatten = self.context.flatten
-            values = flatten(obj.values)
+            values = self.nflatten(obj.values)
             args = [values]
-            data['__reduce__'] = (flatten(index_class), args)
+            data['__reduce__'] = (self.nflatten(index_class), args)
             return data
 
         def restore(self, obj):
             cls, args = obj['__reduce__']
-            cls = self.nrestore(cls, reset=False)
+            cls = self.nrestore(cls)
             values = self.nrestore(args[0])
             return cls(data=values)
 
@@ -143,7 +141,7 @@ class PandasDataFrameHandler(BaseHandler):
 
     def restore(self, obj):
         cls, args = obj['__reduce__']
-        cls = self.nrestore(cls, reset=False)
+        cls = self.nrestore(cls)
         values = self.nrestore(args[0])
         index = self.nrestore(args[1])
         columns = self.nrestore(args[2])
@@ -168,7 +166,17 @@ def register_handlers():
 
 def dumps(obj):
     register_handlers()
-    return jsonpickle.encode(obj).encode("utf-8")
+    return jsonpickle.encode(obj, unpicklable=True).encode("utf-8")
+
+    #from jsonpickle.pickler import _make_backend, Pickler
+    #backend = _make_backend(None)
+    #context = Pickler(unpicklable=True,
+    #                  make_refs=True,
+    #                  keys=False,
+    #                  backend=backend,
+    #                  max_depth=None)
+    #context._mkref = lambda x: True
+    #return backend.encode(context.flatten(obj, reset=False)).encode("utf-8")
 
 
 def loads(obj):

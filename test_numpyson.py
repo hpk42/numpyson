@@ -187,3 +187,20 @@ def test_number(val):
     loaded = loads(dumped)
     assert loaded == val
     assert type(loaded) == type(val)
+
+def test_datetime_identity():
+    import datetime
+    date = datetime.datetime(2013, 11, 1, 0, 0)
+    val = {
+        'start': date,
+        'end': date,
+        'd': {"ttf": pd.TimeSeries([1.],
+                                pd.date_range("1970-1-1", periods=1, freq='S'))
+        }
+    }
+    dumped = dumps(val)
+    loaded = loads(dumped)
+    assert loaded["start"] == val["start"], dumped
+    assert loaded["end"] == val["end"]
+    assert loaded["end"] == val["end"]
+
