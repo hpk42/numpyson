@@ -177,3 +177,12 @@ def test_preservation_of_specific_array_ordering():
     assert_equal(df_f.values, df_f_after.values)
     assert df_f.values.flags.fortran
     assert df_f_after.values.flags.fortran
+
+
+
+@pytest.mark.parametrize("val", [np.float64(4.2), np.int64(5)])
+def test_number(val):
+    dumped = dumps(val)
+    loaded = loads(dumped)
+    assert loaded == val
+    assert type(loaded) == type(val)

@@ -1,19 +1,19 @@
 """
 transparent serialization of numpy/pandas data via jsonpickle.
-compatible to python2.7 and python3.3 and allows to serialize 
+compatible to python2.7 and python3.3 and allows to serialize
 between the two interpreters.
 
-majorly based on code and ideas of David Moss in his MIT licensed pdutils 
+majorly based on code and ideas of David Moss in his MIT licensed pdutils
 repository: https://github.com/drkjam/pdutils
 
 Note that the serialization/deserialization is not space-efficient
-due to the nature of json/jsonpickle. You could certainly save space 
+due to the nature of json/jsonpickle. You could certainly save space
 by compressing/decompressing the resulting json output if you need to.
 
 (C) David Moss, Holger Krekel 2014
 """
 
-__version__ = '0.3.dev1'
+__version__ = '0.3'
 import numpy as np
 import pandas as pd
 
@@ -24,6 +24,18 @@ import jsonpickle.util
 class BaseHandler(jsonpickle.handlers.BaseHandler):
     def nrestore(self, arg, reset=False):
         return self.context.restore(arg, reset=reset)
+
+
+class NumpyNumber(BaseHandler):
+    def flatten(self, obj, data):
+        flatten = self.context.flatten
+        data["__reduce__"] = (flatten(type(obj)), [float(obj)])
+        return data
+
+    def restore(self, obj):
+        cls, args = obj['__reduce__']
+        cls = self.nrestore(cls)
+        return cls(args[0])
 
 
 class NumpyArrayHandler(BaseHandler):
@@ -141,6 +153,8 @@ class PandasDataFrameHandler(BaseHandler):
 
 def register_handlers():
     """Call this function to register handlers with jsonpickle module."""
+    NumpyNumber.handles(np.float64)
+    NumpyNumber.handles(np.int64)
     NumpyArrayHandler.handles(np.ndarray)
 
     PandasIndexHandler.handles(pd.Index)
