@@ -47,7 +47,6 @@ class NumpyArrayHandler(BaseHandler):
         flatten = self.context.flatten
         shape = flatten(obj.shape)
         dtype = str(obj.dtype)
-        np.info(obj)
         order = 'F' if obj.flags.fortran else 'C'
         args = [shape, dtype, buf, order]
         data['__reduce__'] = (flatten(np.ndarray, reset=False), args)
