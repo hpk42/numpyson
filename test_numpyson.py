@@ -49,26 +49,6 @@ def test_nested_array():
     assert_equal(data_before["1"], data_after["1"])
 
 
-def test_preservation_of_specific_array_ordering():
-    arr_c = np.array([[1,2],[3,4]], order='C')
-    arr_f = np.array([[1,2],[3,4]], order='F')
-
-    assert_equal(arr_c, arr_f)
-
-    assert arr_c.strides != arr_f.strides
-
-    #   C array ordering
-    arr_c_after = loads(dumps(arr_c))
-    assert arr_c.strides == arr_c_after.strides
-    assert not arr_c.flags.fortran
-    assert not arr_c_after.flags.fortran
-
-    #   Fortran array order
-    arr_f_after = loads(dumps(arr_f))
-    assert arr_f.strides == arr_f_after.strides
-    assert arr_f.flags.fortran
-    assert arr_f_after.flags.fortran
-
 
 @pytest.mark.parametrize('ts_before', [
     pd.TimeSeries([1, 2, 3], index=[0, 1, 2]),
@@ -177,6 +157,27 @@ def test_preservation_of_specific_array_ordering():
     assert_equal(df_f.values, df_f_after.values)
     assert df_f.values.flags.fortran
     assert df_f_after.values.flags.fortran
+
+def test_preservation_of_specific_array_ordering_simple():
+    arr_c = np.array([[1,2],[3,4]], order='C')
+    arr_f = np.array([[1,2],[3,4]], order='F')
+
+    assert_equal(arr_c, arr_f)
+
+    assert arr_c.strides != arr_f.strides
+
+    #   C array ordering
+    arr_c_after = loads(dumps(arr_c))
+    assert arr_c.strides == arr_c_after.strides
+    assert not arr_c.flags.fortran
+    assert not arr_c_after.flags.fortran
+
+    #   Fortran array order
+    arr_f_after = loads(dumps(arr_f))
+    assert arr_f.strides == arr_f_after.strides
+    assert arr_f.flags.fortran
+    assert arr_f_after.flags.fortran
+
 
 
 
