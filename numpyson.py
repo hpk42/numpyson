@@ -13,7 +13,7 @@ by compressing/decompressing the resulting json output if you need to.
 (C) David Moss, Holger Krekel 2014
 """
 
-__version__ = '0.3'
+__version__ = '0.4'
 import numpy as np
 import pandas as pd
 
@@ -43,12 +43,12 @@ class NumpyNumber(BaseHandler):
 class NumpyArrayHandler(BaseHandler):
     """A jsonpickle handler for numpy (de)serialising arrays."""
     def flatten(self, obj, data):
-        buf = jsonpickle.util.b64encode(obj.tostring())
-        #TODO: should probably also consider including other parameters in future such as byteorder, etc.
+        order = 'F' if obj.flags.fortran else 'C'
+        buf = jsonpickle.util.b64encode(obj.tostring(order=order))
+        #TODO: including other parameters like byteorder, etc?
         #TODO: see numpy.info(obj) and obj.__reduce__() for details.
         shape = self.nflatten(obj.shape)
         dtype = str(obj.dtype)
-        order = 'F' if obj.flags.fortran else 'C'
         args = [shape, dtype, buf, order]
         data['__reduce__'] = (self.nflatten(np.ndarray), args)
         return data

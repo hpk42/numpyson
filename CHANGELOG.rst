@@ -1,3 +1,9 @@
+0.4
+--------------
+
+- fix bug: respect ordering when serializing/deserializing ndarrays
+
+
 0.3
 --------------
 

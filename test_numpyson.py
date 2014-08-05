@@ -144,14 +144,14 @@ def test_build_index_handler_for_type():
 
 @pytest.mark.xfail(reason='failing preserve underlying array state when it is wrapped inside a Pandas object')
 def test_preservation_of_specific_array_ordering():
-    df_c = pd.DataFrame(np.array([[1,2],[3,4]], order='C'))
+    df_c = pd.DataFrame(np.array([[1,2],[3,4], [5,6]], order='C'))
     df_c_after = loads(dumps(df_c))
     assert_frame_equal_strict(df_c, df_c_after)
     assert_equal(df_c.values, df_c_after.values)
     assert not df_c.values.flags.fortran
     assert not df_c_after.values.flags.fortran
 
-    df_f = pd.DataFrame(np.array([[1,2],[3,4]], order='F'))
+    df_f = pd.DataFrame(np.array([[1,2],[3,4], [5,6]], order='F'))
     df_f_after = loads(dumps(df_f))
     assert_frame_equal_strict(df_f, df_f_after)
     assert_equal(df_f.values, df_f_after.values)
@@ -159,8 +159,8 @@ def test_preservation_of_specific_array_ordering():
     assert df_f_after.values.flags.fortran
 
 def test_preservation_of_specific_array_ordering_simple():
-    arr_c = np.array([[1,2],[3,4]], order='C')
-    arr_f = np.array([[1,2],[3,4]], order='F')
+    arr_c = np.array([[1,2],[3,4], [5,6]], order='C')
+    arr_f = np.array([[1,2],[3,4], [5,6]], order='F')
 
     assert_equal(arr_c, arr_f)
 
@@ -171,12 +171,14 @@ def test_preservation_of_specific_array_ordering_simple():
     assert arr_c.strides == arr_c_after.strides
     assert not arr_c.flags.fortran
     assert not arr_c_after.flags.fortran
+    assert_equal(arr_c, arr_c_after)
 
     #   Fortran array order
     arr_f_after = loads(dumps(arr_f))
     assert arr_f.strides == arr_f_after.strides
     assert arr_f.flags.fortran
     assert arr_f_after.flags.fortran
+    assert_equal(arr_f, arr_f_after)
 
 
 
@@ -203,4 +205,5 @@ def test_datetime_identity():
     assert loaded["start"] == val["start"], dumped
     assert loaded["end"] == val["end"]
     assert loaded["end"] == val["end"]
+
 
